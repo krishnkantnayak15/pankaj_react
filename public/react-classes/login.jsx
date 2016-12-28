@@ -25,22 +25,57 @@ function ShowFailureAtDOM(id) {
 var Header = React.createClass({
  render() {
    return (
-     <h1>Web App - Login</h1>
+     <h1>Agents Login </h1>
    )
  }
 });
 
+var agentname
+
+var ListCarriers = React.createClass({
+  render(){
+   var rowsForEdit = []
+    this.props.carriersEdit.forEach((element,index)=>{
+      rowsForEdit.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text" readOnly/></td><td><input type="password" readOnly /></td><td><input type="submit" value="edit"/></td></tr></tbody>)
+    })
+    var rowsForAdd = []
+     this.props.carriersAdd.forEach((element,index)=>{
+       rowsForAdd.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text"/></td><td><input type="password" /></td><td><input type="submit" value="add"/></td></tr></tbody>)
+     })
+  return(
+  <div >
+     <span><table id ="first">{rowsForAdd}</table></span><br/><br/><br/>
+     <table id ="first">{rowsForEdit}</table>
+   </div>
+   )
+  }
+})
 var LoginForm = React.createClass({
+getInitialState() {
+  return {action:'login' , error:"",carriersEdit : [], carriersAdd : []}
+},
+
+
  ValidateLogin() {
+  var updateState = this.setState.bind(this)
    var email = this.refs.LoginEmail.state.value;
    var password = this.refs.LoginPassword.state.value;
    var params ={username: email,password:password};
+
    var xhttp = new XMLHttpRequest();
-   xhttp.onreadystatechange = function() {
+   xhttp.onreadystatechange = function(res) {
+
     if (this.readyState == 4 && this.status == 200) {
-      console.log('inside success')
-    } else {
-      console.log('inside failure')
+    agentname=JSON.parse(res.target.response).agentname
+       if(agentname){
+       console.log("agent =>",JSON.parse(res.target.response).agentname)
+       console.log("carriersAddVar =>",JSON.parse(res.target.response).carriersAddVar)
+       console.log("carriersEditVar =>",JSON.parse(res.target.response).carriersEditVar)
+         updateState({action:"success",carriersAdd:JSON.parse(res.target.response).carriersAddVar,carriersEdit:JSON.parse(res.target.response).carriersEditVar})
+       }
+        else{
+            updateState({error:"wrong username or password"})
+        }
     }
   };
   xhttp.open("POST", "/login", true);
@@ -48,26 +83,34 @@ var LoginForm = React.createClass({
   xhttp.send(JSON.stringify(params));
   //xhttp.send(params);
  },
- render() {
-action1 :
-   return (
-     <div className="loginDiv">
-       <Header />
-       <LoginEmail ref="LoginEmail"/>
-       <LoginPassword ref="LoginPassword"/>
-       <br></br>
-       <LoginSubmit ValidateLogin={this.ValidateLogin}/>
-     </div>
-   )
+ render()
+  {
 
-   action2:
-   return (
-     <div className="loginDiv">
-        welcome user
-     </div>
-   )
+ switch(this.state.action){
+  case "login":
+
+  return (
+    <div className="loginDiv">
+      <Header />
+      <LoginEmail ref="LoginEmail"/>
+      <LoginPassword ref="LoginPassword"/>
+      <br></br>
+      <LoginSubmit ValidateLogin={this.ValidateLogin}/>
+       <h1>{this.state.error}</h1>
+    </div>)
+ case "success":
+ return (
+ <div>
+     <h1 >Carrier Details</h1>
+     <h3>welcome {agentname} </h3>
+     <ListCarriers carriersAdd={this.state.carriersAdd} carriersEdit={this.state.carriersEdit}  />
+  </div>
+ )
  }
+
+}
 });
+
 
 var LoginEmail = React.createClass({
  getInitialState() {
@@ -80,7 +123,7 @@ var LoginEmail = React.createClass({
    return (
      <div className="LoginEmailDiv">
        <h6>Email:</h6>
-       <input type="text" onChange={this.onChange}/>
+       <input type="text" onChange={this.onChange} placeholder="username"  id="user"/>
      </div>
    )
  }
@@ -96,8 +139,8 @@ var LoginPassword = React.createClass({
  render() {
    return (
      <div className="LoginEmailDiv">
-       <h6>Password:</h6>
-       <input type="password" onChange={this.onChange}/>
+       <h5>Password:</h5>
+       <input type="password" onChange={this.onChange} placeholder="password" id="pass"/>
      </div>
    )
  }
@@ -107,27 +150,13 @@ var LoginSubmit = React.createClass({
  onClick() {
    this.props.ValidateLogin();
  },
+
  render() {
    return (
      <button onClick={this.onClick}>Login</button>
    )
  }
-});
 
-var LoginSuccess = React.createClass({
- render() {
-   return (
-     <h2>Login Success! Welcome Back, {this.props.name}</h2>
-   )
- }
-});
-
-var LoginFail = React.createClass({
- render() {
-   return (
-     <h2>Login FAIL...</h2>
-   )
- }
 });
 
 ReactDOM.render(
