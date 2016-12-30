@@ -14,31 +14,25 @@ class Agent {
    var diff = []
 
    db.query("SELECT carrier FROM carrier WHERE state = ?;" ,[state],(err,data)=>{
-      db.query("SELECT carrier FROM credential_storage WHERE agent_name = ?;" ,[agentname],(err,docs)=>{
+      db.query("SELECT carrier,username_carrier,password_carrier FROM credential_storage WHERE agent_name = ?;" ,[agentname],(err,docs)=>{
       if(docs.length){
        data.map((carrier)=>{
            for (var i = 0; i < docs.length; i++) {
-             console.log("carrier : ",carrier);
-             console.log("doc : ",docs[i]);
-             if(carrier.carrier == docs[i].carrier){
-               console.log("found");
+             if(carrier.carrier == docs[i].carrier)
               break
-            }
            }
-           if(i == docs.length){
-             console.log("not found");
+           if(i == docs.length)
               diff.push(carrier)
-            }
          })
        }
       else
         diff = data
-       console.log("data",data);
-       console.log("docs",docs);
-       console.log("diff",diff);
-       cb(diff);
+        cb(diff);
      })
    })
+ }
+ static insertCredential(req , cb){
+   db.query("insert into credential_storage VALUES(?,?,?,?);",[req.agent_name,req.carrier,req.username_carrier,req.password_carrier],cb)
  }
 
 }

@@ -1,26 +1,3 @@
-function Login(email, password) {
-if (email) {
- ShowSuccessAtDOM("container", email);
-} else {
- ShowFailureAtDOM("container");
-}
-};
-
-function ShowSuccessAtDOM(id, name) {
- ReactDOM.unmountComponentAtNode(document.getElementById("result"));
- ReactDOM.render(
-   <LoginSuccess name={name} />,
-   document.getElementById("result")
- );
-};
-
-function ShowFailureAtDOM(id) {
- ReactDOM.unmountComponentAtNode(document.getElementById("result"));
- ReactDOM.render(
-   <LoginFail />,
-   document.getElementById("result")
- );
-};
 
 var Header = React.createClass({
  render() {
@@ -39,53 +16,41 @@ var ListCarriers = React.createClass({
 
   },
   getUserName(event){
-    console.log("heeeee")
     this.setState({username_carrier : event.target.value } )
   },
   getPassword(event){
-     console.log("haaa")
     this.setState({password_carrier : event.target.value})
-
   },
-  add(event){
-    console.log("in add")
-    var updateProps = this.props.modifyState
+  addCredentials(agentname,carrier){
 
-     var credentialObj = {agent_name : agentname,carrier : event.target.id, username_carrier : this.state.username_carrier, password_carrier : this.state.password_carrier }
-    var xhttp = new XMLHttpRequest();
-
-    xhttp.onreadystatechange = function(res) {
-     if (this.readyState == 4 && this.status == 200) {
-        updateProps(JSON.parse(res.target.response).carriersAddVar,JSON.parse(res.target.response).carriersEditVar)
-     }
-   };
-   xhttp.open("POST", "/add-credential", true);
-   xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-   xhttp.send(JSON.stringify(credentialObj));
+  console.log('agentname' , agentname)
+  console.log('carrier' , carrier)
+  console.log('username_carrier' , this.state.username_carrier)
+  console.log('password_carrier' , this.state.password_carrier)
   },
   render(){
-
    var rowsForEdit = []
     this.props.carriersEdit.forEach((element,index)=>{
-      rowsForEdit.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text"  value = {element.username_carrier} readOnly/></td><td><input type="password"  value = {element.password_carrier}  readOnly /></td><td><button>edit</button></td></tr></tbody>)
+      rowsForEdit.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text"  value={element.username_carrier} readOnly/></td><td><input type="password"   value={element.password_carrier} readOnly  /></td><td><input type="button" value="edit"/></td></tr></tbody>)
     })
     var rowsForAdd = []
      this.props.carriersAdd.forEach((element,index)=>{
-       rowsForAdd.push(<tbody  id ={element.carrier} key={index}><tr><td >{element.carrier}</td><td><input type="text" onChange={this.getUserName} id ={element.carrier} /></td><td><input type="password" onChange={this.getPassword} id ={element.carrier}  /></td><td><button  onClick = {this.add}  id = {element.carrier}> add </button></td></tr></tbody>)
+       rowsForAdd.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text"  placeholder="username" onChange={this.getUserName()}/></td><td><input type="password" placeholder="password" onChange={this.getPassword}/></td><td><input type="button" value="add" onClick = {this.addCredentials(agentname,element.carrier)}/></td></tr></tbody>)
      })
   return(
   <div >
      <span><table id ="first">{rowsForAdd}</table></span><br/><br/><br/>
-     <table id ="first">{rowsForEdit}</table>
-   </div>
+     <table id ="first">{rowsForEdit}</table>}
+  </div>
    )
   }
 })
-
 var LoginForm = React.createClass({
 getInitialState() {
-  return {action:'login' , error:"",carriersEdit : [], carriersAdd : []}
+  return {action:'login' , error:"",carriersEdit : [], carriersAdd : [],agentName:"",}
 },
+
+
  ValidateLogin() {
   var updateState = this.setState.bind(this)
    var email = this.refs.LoginEmail.state.value;
@@ -101,10 +66,10 @@ getInitialState() {
        console.log("agent =>",JSON.parse(res.target.response).agentname)
        console.log("carriersAddVar =>",JSON.parse(res.target.response).carriersAddVar)
        console.log("carriersEditVar =>",JSON.parse(res.target.response).carriersEditVar)
-         updateState({action:"success",carriersAdd:JSON.parse(res.target.response).carriersAddVar,carriersEdit:JSON.parse(res.target.response).carriersEditVar})
+         updateState({action:"success",carriersAdd:JSON.parse(res.target.response).carriersAddVar,agentName : agentname,carriersEdit:JSON.parse(res.target.response).carriersEditVar})
        }
         else{
-          updateState({error:"wrong username or password"})
+            updateState({error:"wrong username or password"})
         }
     }
   };
@@ -112,9 +77,6 @@ getInitialState() {
   xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhttp.send(JSON.stringify(params));
   //xhttp.send(params);
- },
- modifyState(addArr,editArr){
-   this.setState({carriersEdit : editArr,carriersAdd : addArr})
  },
  render()
   {
@@ -136,7 +98,7 @@ getInitialState() {
  <div>
      <h1 >Carrier Details</h1>
      <h3>welcome {agentname} </h3>
-     <ListCarriers carriersAdd={this.state.carriersAdd} carriersEdit={this.state.carriersEdit} modifyState={this.modifyState}/>
+     <ListCarriers carriersAdd={this.state.carriersAdd} carriersEdit={this.state.carriersEdit} agentName={agentname} />
   </div>
  )
  }
