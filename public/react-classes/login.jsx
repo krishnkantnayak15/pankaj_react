@@ -48,6 +48,8 @@ var ListCarriers = React.createClass({
 
   },
   add(event){
+
+  console.log("eventadd" , event)
     console.log("in add")
     var updateProps = this.props.modifyState
 
@@ -63,11 +65,15 @@ var ListCarriers = React.createClass({
    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
    xhttp.send(JSON.stringify(credentialObj));
   },
+  editCredentials(e) {
+   console.log("fdsf",this.refs.set.disabled)
+   this.refs.set.disabled
+  },
   render(){
 
    var rowsForEdit = []
     this.props.carriersEdit.forEach((element,index)=>{
-      rowsForEdit.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text"  value = {element.username_carrier} readOnly/></td><td><input type="password"  value = {element.password_carrier}  readOnly /></td><td><button>edit</button></td></tr></tbody>)
+      rowsForEdit.push(<tbody key={index}><tr><td >{element.carrier}</td><td><input type="text" ref="set" disabled={isDisabled ? "disabled" : false} placeholder= {element.username_carrier} /></td><td><input type="password" id="set" placeholder = {element.password_carrier}   /></td><td><button  onClick={this.editCredentials}>edit</button></td></tr></tbody>)
     })
     var rowsForAdd = []
      this.props.carriersAdd.forEach((element,index)=>{
